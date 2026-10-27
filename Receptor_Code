@@ -1,0 +1,83 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+
+#define IN1 A2
+#define IN2 A3
+#define IN3 A4
+#define IN4 A5
+
+RF24 radio(9, 10); 
+const byte address[6] = "00001";
+
+struct Date_Manusa {
+  int x;
+  int y;
+};
+Date_Manusa date;
+
+unsigned long ultimulSemnal = 0;
+
+void setup() {
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  digitalWrite(IN1, LOW); 
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW); 
+  digitalWrite(IN4, LOW);
+
+  radio.begin();
+  radio.setChannel(115); 
+  radio.setDataRate(RF24_1MBPS);
+  radio.setPALevel(RF24_PA_LOW);
+  radio.openReadingPipe(0, address);
+  radio.startListening();
+}
+
+void loop() {
+  if (radio.available()) {
+    radio.read(&date, sizeof(Date_Manusa));
+    ultimulSemnal = millis();
+    
+    int axaY = date.y; 
+    int axaX = date.x; 
+
+    if (abs(axaY) < 20) axaY = 0;
+    if (abs(axaX) < 20) axaX = 0;
+
+    int motorStanga = axaY + axaX;
+    int motorDreapta = axaY - axaX;
+
+    if (motorStanga > 0) {
+      digitalWrite(IN1, HIGH);
+      digitalWrite(IN2, LOW);
+    } else if (motorStanga < 0) {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+    } else {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, LOW);
+    }
+
+    if (motorDreapta > 0) {
+      digitalWrite(IN3, HIGH);
+      digitalWrite(IN4, LOW);
+    } else if (motorDreapta < 0) {
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    } else {
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, LOW);
+    }
+  }
+
+  if (millis() - ultimulSemnal > 500) {
+    digitalWrite(IN1, LOW);
+    digitalWrite(IN2, LOW);
+    digitalWrite(IN3, LOW);
+    digitalWrite(IN4, LOW);
+  }
+}
