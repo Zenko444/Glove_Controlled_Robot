@@ -1,6 +1,6 @@
 # Gesture-Controlled Robot Car
 
-A dual-Arduino system for a gesture-controlled robotic vehicle. It uses an MPU6050 accelerometer for hand-tracking and nRF24L01 modules for wireless communication.
+A dual-Arduino system for a gesture-controlled robotic vehicle. It uses an MPU6050 accelerometer for hand-tracking and nRF24L01 modules for wireless communication. Additionally, it uses a LM2596 Step-down power, staying at a steady 5V, in order to not burn out the Nano.
 
 ## Features
 
@@ -9,8 +9,8 @@ A dual-Arduino system for a gesture-controlled robotic vehicle. It uses an MPU60
 - **Signal Failsafe:** Receiver automatically kills motor power if no radio data is received for 500ms.
 
 ## Hardware Requirements
-
-- 2x Arduino Boards (e.g., Uno/Nano)
+- 2x LM2596 Step-Down module
+- 2x Arduino Boards (Nano V3)
 - 2x nRF24L01 Radio Modules
 - 1x MPU6050 Accelerometer/Gyroscope Module (Transmitter)
 - 1x Motor Driver (e.g., L298N) (Receiver)
