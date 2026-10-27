@@ -1,0 +1,54 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+#include <Wire.h>
+
+RF24 radio(9, 10);
+const byte address[6] = "00001";
+const int MPU = 0x68; 
+
+struct Date_Manusa {
+  int x;
+  int y;
+};
+Date_Manusa date;
+
+void setup() {
+  Wire.begin();
+  Wire.beginTransmission(MPU);
+  Wire.write(0x6B); 
+  Wire.write(0);    
+  Wire.endTransmission(true);
+
+  radio.begin();
+  radio.setChannel(115);
+  radio.setDataRate(RF24_1MBPS);
+  radio.setPALevel(RF24_PA_LOW); 
+  radio.openWritingPipe(address);
+  radio.stopListening();
+}
+
+void loop() {
+  Wire.beginTransmission(MPU);
+  Wire.write(0x3B);
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU, 4, true); 
+
+  int16_t AcX = Wire.read() << 8 | Wire.read();
+  int16_t AcY = Wire.read() << 8 | Wire.read();
+
+
+  date.x = map(AcY, 16000, -16000, -100, 100); 
+  date.y = map(AcX, -16000, 16000, -100, 100); 
+
+  date.x = constrain(date.x, -100, 100);
+  date.y = constrain(date.y, -100, 100);
+
+  const int pragMort = 20;
+
+  if (abs(date.x) < pragMort) date.x = 0;
+  if (abs(date.y) < pragMort) date.y = 0;
+
+  radio.write(&date, sizeof(Date_Manusa));
+  delay(20);
+}
